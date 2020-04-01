@@ -1,2 +1,1 @@
-import { SphereGeometry } from './SphereGeometry';
-export { SphereGeometry };
+export { SphereGeometry } from './SphereGeometry';

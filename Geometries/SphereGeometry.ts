@@ -1,8 +1,6 @@
 
-import { BufferGeometry } from '../../../BufferGeometry'
-import { Float32Attribute } from '../../../Float32Attribute'
-import { Uint32Attribute } from '../../../Uint32Attribute'
-import { Vector3 } from '../../../math/Vector3'
+import { BufferGeometry, Float32Attribute, Uint32Attribute, Vector3, Vector2 } from '@gl-widget/gl-widget'
+
 
 class SphereGeometry extends BufferGeometry {
   indices: any[]

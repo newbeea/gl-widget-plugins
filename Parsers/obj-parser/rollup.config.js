@@ -22,9 +22,13 @@ export default {
       file: 'dist/index.umd.js',
       name: 'parse',
       format: 'umd',
-      sourcemap: true
+      sourcemap: true,
+      globals: {
+        '@gl-widget/gl-widget': 'GlWidget'
+      }
     }
   ],
+  external: ['@gl-widget/gl-widget'],
   plugins: [
     typescript({ module: 'ESNext' }),
     babel(),

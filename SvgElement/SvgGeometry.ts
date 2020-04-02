@@ -2,7 +2,6 @@
 import svgMesh3d from 'svg-mesh-3d'
 import { Geometry } from '@gl-widget/gl-widget'
 
-import parseXML from 'xml-parse-from-string'
 function traverseNodes(child, paths, attributes = {}) {
   for (let i in child.childNodes) {
     let c = child.childNodes[i];

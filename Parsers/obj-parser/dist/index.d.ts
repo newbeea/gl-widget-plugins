@@ -1,3 +1,2 @@
-import { BufferGeometry } from '@gl-widget/gl-widget';
-declare function parse(objString: any): BufferGeometry;
+declare function parse(objString: any): any;
 export { parse };

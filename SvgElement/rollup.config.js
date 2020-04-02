@@ -23,9 +23,13 @@ export default {
       file: 'dist/index.umd.js',
       name: 'materials',
       format: 'umd',
-      sourcemap: true
+      sourcemap: true,
+      globals: {
+        '@gl-widget/gl-widget': 'GlWidget'
+      }
     }
   ],
+  external: ['@gl-widget/gl-widget'],
   plugins: [
     typescript({ module: 'ESNext' }),
     babel(),
@@ -39,5 +43,9 @@ export default {
     commonjs({ extensions: ['.js', '.ts'] }),
     terser()
     
-  ]
+  ],
+  onwarn (warning) {
+    console.log(warning)
+    if (warning.code === 'MODULE_LEVEL_DIRECTIVE') return;
+  }
 }

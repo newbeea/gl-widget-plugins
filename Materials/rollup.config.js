@@ -5,7 +5,7 @@ import commonjs from '@rollup/plugin-commonjs';
 import typescript from 'rollup-plugin-typescript2';
 import {terser} from 'rollup-plugin-terser';
 import babel from 'rollup-plugin-babel';
-
+import glsl from 'rollup-plugin-glsl';
 
 export default {
   input: 'index.ts',
@@ -30,15 +30,20 @@ export default {
   ],
   external: ['@gl-widget/gl-widget'],
   plugins: [
+    // glslify(),
     typescript({ module: 'ESNext' }),
     babel(),
     resolve({
       jsnext: true,
       main: true,
-      browser: true
+      browser: true,
+      preferBuiltins: true
+    }),
+    glsl({
+      include: './**/*.glsl'
     }),
     commonjs({ extensions: ['.js', '.ts'] }),
-    terser()
+    // terser()
     
   ]
 }

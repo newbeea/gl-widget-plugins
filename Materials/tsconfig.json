@@ -1,16 +1,16 @@
 {
   "compilerOptions": {
     "declaration": true,
-    "module": "ES6",
+    "module": "esnext",
     "esModuleInterop": true,
-    "target": "ES6",
+    "target": "esnext",
     "lib": [
       "es2019",
       "dom"
     ]
   },
   "include": [
-    "./*.ts"
+    "./**/*.ts"
   ],
   "exclude": [
     "./node_modules"

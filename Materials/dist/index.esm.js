@@ -1,2 +1,171 @@
-import{Vector3 as n,RenderSide as i}from"@gl-widget/gl-widget";class e{constructor(i={}){this.vertexShader="\n      attribute vec4 position;\n      attribute vec4 normal;\n      attribute vec2 uv                                                                                                                                                                                                                                                                                                                       ;\n      varying vec2 vUv;\n      varying vec4 vNormal;\n      varying vec4 vPosition;\n      uniform mat3 uvTransform;\n      uniform mat4 mvpMatrix;\n  \n      void main () {\n        gl_Position = mvpMatrix*position;\n        vPosition = gl_Position;\n        vNormal = normal;\n        vUv = ( uvTransform * vec3( uv, 1 ) ).xy;\n      }\n    ",this.fragmentShader="\n      precision mediump float;\n      varying vec4 vPosition;\n      varying vec4 vNormal; \n      varying vec2 vUv;\n  \n      uniform vec3 globalAmbient; //入射环境光颜色\n      uniform vec3 lightColor; //灯光颜色\n      uniform vec3 lightPosition; //灯光的位置\n      uniform vec3 eyePosition;  //摄像机位置\n      uniform vec3 Ke;          //Ke是材质的放射光（自发光）颜色\n      uniform vec3 Ka;          //Ka是材质的环境反射系数\n      uniform vec3 Kd;          //Kd是材质的漫反射颜色\n      uniform vec3 Ks;          //Ks是材质的镜面反射颜色\n      uniform float shininess;     //材质表面光泽度\n      void main() {\n  \n        vec3 N = vNormal.xyz; \n        vec3 P = vPosition.xyz;\n  \n        //公式一计算放射光\n        vec3 emissive = Ke; \n        \n        //公式二计算环境光\n        vec3 ambient = Ka * globalAmbient;\n        \n        //公式三计算漫反射光\n        vec3 L = normalize (lightPosition - P); //L为标准化指向灯光的向量。\n        float diffuseLight = max(dot(N,L),0.0);   \n        vec3 diffuse = Kd * lightColor *diffuseLight;\n        \n        //公式四计算镜面放射\n        vec3 V = normalize(eyePosition - P);\n        vec3 H = normalize (L+V);\n        float specularLight = pow(max (dot (N,H),0.0), shininess);\n        if(dot(N,L) <= 0.0) {\n          specularLight = 0.0;\n        }\n            \n        vec3 specular = Ks * lightColor * specularLight ;\n        \n        // //基本光照模型完成\n        vec4 color;\n        color.xyz = emissive + ambient + diffuse + specular;\n        \n        color.w = 1.0;\n        gl_FragColor = color;\n      }\n    ",this.uniforms={globalAmbient:{value:i.ambient||new n(0,0,0)},lightColor:{value:new n(1,1,1)},lightPosition:{value:new n(30,0,30)},eyePosition:{value:new n(0,0,30)},Ke:{value:new n(0,0,0)},Ka:{value:new n(1,1,1)},Kd:{value:new n(1,1,1)},Ks:{value:new n(.1,.1,.1)},shininess:{value:32}}}}class o{constructor(n=null){this.transparent=!1,this.vertexShader="\n      attribute vec4 position;\n      attribute vec4 normal;\n      attribute vec2 uv;\n\n      varying vec2 vUv;\n      uniform mat4 mvpMatrix;\n      void main() {\n        vUv = uv;\n        gl_Position = mvpMatrix * vec4( position );\n      }\n    ",this.fragmentShader="\n      precision mediump float;\n      uniform sampler2D tDiffuse;\n      uniform float opacity;\n      varying vec2 vUv;\n      \n      void main() {\n\n        vec4 texel = texture2D( tDiffuse, vUv );\n        gl_FragColor = opacity * texel;\n      }\n    ",this.uniforms={tDiffuse:{value:n},opacity:{value:1}},this.side=i.DOUBLE}}export{e as BlinnPhongMaterial,o as TextureMaterial};
+import { Vector3, RenderSide } from '@gl-widget/gl-widget';
+
+class BlinnPhongMaterial {
+    constructor(options = {}) {
+        this.vertexShader = `
+      attribute vec4 position;
+      attribute vec4 normal;
+      attribute vec2 uv                                                                                                                                                                                                                                                                                                                       ;
+      varying vec2 vUv;
+      varying vec4 vNormal;
+      varying vec4 vPosition;
+      uniform mat3 uvTransform;
+      uniform mat4 mvpMatrix;
+  
+      void main () {
+        gl_Position = mvpMatrix*position;
+        vPosition = gl_Position;
+        vNormal = normal;
+        vUv = ( uvTransform * vec3( uv, 1 ) ).xy;
+      }
+    `;
+        this.fragmentShader = `
+      precision mediump float;
+      varying vec4 vPosition;
+      varying vec4 vNormal; 
+      varying vec2 vUv;
+  
+      uniform vec3 globalAmbient; //入射环境光颜色
+      uniform vec3 lightColor; //灯光颜色
+      uniform vec3 lightPosition; //灯光的位置
+      uniform vec3 eyePosition;  //摄像机位置
+      uniform vec3 Ke;          //Ke是材质的放射光（自发光）颜色
+      uniform vec3 Ka;          //Ka是材质的环境反射系数
+      uniform vec3 Kd;          //Kd是材质的漫反射颜色
+      uniform vec3 Ks;          //Ks是材质的镜面反射颜色
+      uniform float shininess;     //材质表面光泽度
+      void main() {
+  
+        vec3 N = vNormal.xyz; 
+        vec3 P = vPosition.xyz;
+  
+        //公式一计算放射光
+        vec3 emissive = Ke; 
+        
+        //公式二计算环境光
+        vec3 ambient = Ka * globalAmbient;
+        
+        //公式三计算漫反射光
+        vec3 L = normalize (lightPosition - P); //L为标准化指向灯光的向量。
+        float diffuseLight = max(dot(N,L),0.0);   
+        vec3 diffuse = Kd * lightColor *diffuseLight;
+        
+        //公式四计算镜面放射
+        vec3 V = normalize(eyePosition - P);
+        vec3 H = normalize (L+V);
+        float specularLight = pow(max (dot (N,H),0.0), shininess);
+        if(dot(N,L) <= 0.0) {
+          specularLight = 0.0;
+        }
+            
+        vec3 specular = Ks * lightColor * specularLight ;
+        
+        // //基本光照模型完成
+        vec4 color;
+        color.xyz = emissive + ambient + diffuse + specular;
+        
+        color.w = 1.0;
+        gl_FragColor = color;
+      }
+    `;
+        this.uniforms = {
+            globalAmbient: {
+                value: options.ambient || new Vector3(0, 0, 0)
+            },
+            lightColor: {
+                value: new Vector3(1, 1, 1)
+            },
+            lightPosition: {
+                value: new Vector3(30, 0, 30)
+            },
+            eyePosition: {
+                value: new Vector3(0, 0, 30)
+            },
+            Ke: {
+                value: new Vector3(0, 0, 0)
+            },
+            Ka: {
+                value: new Vector3(1, 1, 1)
+            },
+            Kd: {
+                value: new Vector3(1, 1, 1)
+            },
+            Ks: {
+                value: new Vector3(0.1, 0.1, 0.1)
+            },
+            shininess: {
+                value: 32
+            }
+        };
+    }
+}
+
+class TextureMaterial {
+    constructor(tDiffuse = null) {
+        this.transparent = false;
+        this.vertexShader = `
+      attribute vec4 position;
+      attribute vec4 normal;
+      attribute vec2 uv;
+
+      varying vec2 vUv;
+      uniform mat4 mvpMatrix;
+      void main() {
+        vUv = uv;
+        gl_Position = mvpMatrix * vec4( position );
+      }
+    `;
+        this.fragmentShader = `
+      precision mediump float;
+      uniform sampler2D tDiffuse;
+      uniform float opacity;
+      varying vec2 vUv;
+      
+      void main() {
+
+        vec4 texel = texture2D( tDiffuse, vUv );
+        gl_FragColor = opacity * texel;
+      }
+    `;
+        this.uniforms = {
+            "tDiffuse": { value: tDiffuse },
+            "opacity": { value: 1.0 }
+        };
+        this.side = RenderSide.DOUBLE;
+    }
+}
+
+class NoiseMaterial {
+    constructor(i) {
+        this.transparent = false;
+        this.vertexShader = `
+      attribute vec4 position;
+      attribute vec4 normal;
+      attribute vec2 uv;
+
+      varying vec2 vUv;
+      uniform mat4 mvpMatrix;
+      void main() {
+        vUv = uv;
+        gl_Position = mvpMatrix * vec4( position );
+      }
+    `;
+        this.fragmentShader = `
+      precision mediump float;
+      uniform sampler2D tDiffuse;
+      uniform float opacity;
+      varying vec2 vUv;
+      
+      void main() {
+
+        vec4 texel = texture2D( tDiffuse, vUv );
+        gl_FragColor = opacity * texel;
+      }
+    `;
+        this.uniforms = {};
+        this.side = RenderSide.DOUBLE;
+    }
+}
+
+export { BlinnPhongMaterial, NoiseMaterial, TextureMaterial };
 //# sourceMappingURL=index.esm.js.map

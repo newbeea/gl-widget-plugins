@@ -1,37 +1,15 @@
 import { RenderSide } from "@gl-widget/gl-widget";
 
-
+import noiseShader from './shader-lib/noise.glsl'
 class NoiseMaterial {
   vertexShader: string
-  fragmentShader:string
+  fragmentShader: string
   uniforms: any
   side: RenderSide;
   transparent = false 
-  constructor (i?) {
-    this.vertexShader = `
-      attribute vec4 position;
-      attribute vec4 normal;
-      attribute vec2 uv;
+  constructor () {
 
-      varying vec2 vUv;
-      uniform mat4 mvpMatrix;
-      void main() {
-        vUv = uv;
-        gl_Position = mvpMatrix * vec4( position );
-      }
-    `
-   this.fragmentShader = `
-      precision mediump float;
-      uniform sampler2D tDiffuse;
-      uniform float opacity;
-      varying vec2 vUv;
-      
-      void main() {
-
-        vec4 texel = texture2D( tDiffuse, vUv );
-        gl_FragColor = opacity * texel;
-      }
-    `
+   this.fragmentShader = noiseShader
     this.uniforms = {
 
 

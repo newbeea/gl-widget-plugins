@@ -5,6 +5,6 @@ declare class NoiseMaterial {
     uniforms: any;
     side: RenderSide;
     transparent: boolean;
-    constructor(i?: any);
+    constructor();
 }
 export { NoiseMaterial };

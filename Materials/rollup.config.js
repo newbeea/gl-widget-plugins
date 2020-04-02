@@ -3,10 +3,9 @@
 import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import typescript from 'rollup-plugin-typescript2';
-import {terser} from 'rollup-plugin-terser';
 import babel from 'rollup-plugin-babel';
-import glsl from 'rollup-plugin-glsl';
-
+import glslify from 'rollup-plugin-glslify'
+import {terser} from 'rollup-plugin-terser';
 export default {
   input: 'index.ts',
   output: [
@@ -30,7 +29,7 @@ export default {
   ],
   external: ['@gl-widget/gl-widget'],
   plugins: [
-    // glslify(),
+    glslify(),
     typescript({ module: 'ESNext' }),
     babel(),
     resolve({
@@ -39,11 +38,6 @@ export default {
       browser: true,
       preferBuiltins: true
     }),
-    glsl({
-      include: './**/*.glsl'
-    }),
     commonjs({ extensions: ['.js', '.ts'] }),
-    // terser()
-    
   ]
 }

@@ -39,5 +39,6 @@ export default {
       preferBuiltins: true
     }),
     commonjs({ extensions: ['.js', '.ts'] }),
+    terser()
   ]
 }

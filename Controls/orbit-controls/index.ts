@@ -1,4 +1,4 @@
-import { Camera, Vector2, Vector3, OrthographicCamera, PerspectiveCamera, Quaternion } from "@gl-widget/gl-widget";
+import { GLWidget, Camera, Vector2, Vector3, CameraType, Quaternion } from "@gl-widget/gl-widget";
 
 
 import Spherical from "./Spherical";
@@ -58,9 +58,9 @@ class OrbitControls {
   mouseButtons: { LEFT: number; MIDDLE: number; RIGHT: number; };
   camera: Camera;
   domElement: HTMLElement;
-  constructor(camera: Camera, domElement) {
-    this.camera = camera
-    this.domElement = domElement
+  constructor(glWidget: GLWidget) {
+    this.camera = glWidget.camera
+    this.domElement = glWidget.canvas
     this.enabled = true
     this.target = new Vector3();
 
@@ -440,11 +440,11 @@ class OrbitControls {
   }
   dollyIn( dollyScale ) {
 
-		if ( this.camera.isPerspective ) {
+		if ( this.camera.type === CameraType.PERSPECTIVE ) {
 
 			this.scale /= dollyScale;
 
-		} else if ( this.camera.isOrthographic ) {
+		} else if ( this.camera.type === CameraType.ORTHOGRAPHIC ) {
 
 			this.camera.zoom = Math.max( this.minZoom, Math.min( this.maxZoom, this.camera.zoom * dollyScale ) );
 			this.camera.updateProjectionMatrix();
@@ -460,11 +460,11 @@ class OrbitControls {
 
 	dollyOut( dollyScale ) {
 
-    if ( this.camera.isPerspective ) {
+    if ( this.camera.type === CameraType.PERSPECTIVE ) {
 
 			this.scale *= dollyScale;
 
-    } else if (this.camera.isOrthographic) {
+    } else if ( this.camera.type === CameraType.ORTHOGRAPHIC ) {
 
 			this.camera.zoom = Math.max( this.minZoom, Math.min( this.maxZoom, this.camera.zoom / dollyScale ) );
 			this.camera.updateProjectionMatrix();

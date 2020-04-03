@@ -1,4 +1,4 @@
-import { Camera, Vector2, Vector3 } from "@gl-widget/gl-widget";
+import { GLWidget, Camera, Vector2, Vector3 } from "@gl-widget/gl-widget";
 declare class OrbitControls {
     onMouseWheel: (event: any) => void;
     onMouseUp: (event: any) => void;
@@ -46,7 +46,7 @@ declare class OrbitControls {
     };
     camera: Camera;
     domElement: HTMLElement;
-    constructor(camera: Camera, domElement: any);
+    constructor(glWidget: GLWidget);
     handleMouseDownRotate(event: any): void;
     handleMouseDownDolly(event: any): void;
     handleMouseMoveRotate(event: any): void;

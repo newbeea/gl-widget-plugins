@@ -1,7 +1,7 @@
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('@gl-widget/gl-widget')) :
   typeof define === 'function' && define.amd ? define(['exports', '@gl-widget/gl-widget'], factory) :
-  (global = global || self, factory(global.materials = {}, global.GlWidget));
+  (global = global || self, factory(global.materials = {}, global.GLWidget));
 }(this, (function (exports, glWidget) { 'use strict';
 
   class BlinnPhongMaterial {

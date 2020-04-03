@@ -24,7 +24,7 @@ export default {
       format: 'umd',
       sourcemap: true,
       globals: {
-        '@gl-widget/gl-widget': 'GlWidget'
+        '@gl-widget/gl-widget': 'GLWidget'
       }
     }
   ],

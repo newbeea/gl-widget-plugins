@@ -12,8 +12,8 @@ class NoiseMaterial {
    this.fragmentShader = noiseShader
     this.uniforms = {
 
-
     }
+    let a = []
     this.side = RenderSide.DOUBLE
 
   }

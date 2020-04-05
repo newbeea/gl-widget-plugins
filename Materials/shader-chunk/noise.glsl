@@ -1,4 +1,3 @@
-
 vec4 mod289(vec4 x)
 {
   return x - floor(x * (1.0 / 289.0)) * 289.0;
@@ -57,5 +56,4 @@ float cnoise(vec2 P)
   float n_xy = mix(n_x.x, n_x.y, fade_xy.y);
   return 2.3 * n_xy;
 }
-
 #pragma glslify: export(cnoise)

@@ -4,8 +4,35 @@ import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import typescript from 'rollup-plugin-typescript2';
 import babel from 'rollup-plugin-babel';
-import glslify from 'rollup-plugin-glslify'
 import {terser} from 'rollup-plugin-terser';
+import includeText from 'rollup-plugin-include-text';
+let isProd = process.env.NODE_ENV === 'production'
+
+const basePlugins = [
+  typescript({ module: 'ESNext' }),
+  babel(),
+  resolve({
+    jsnext: true,
+    main: true,
+    browser: true
+  }),
+  includeText({
+    remove: /#pragma\s+.*\)/g,
+    include: [
+      '**/*.glsl'
+    ],
+    defaultFileExtension: '.glsl',
+    allowedFileExtensions: ['.glsl']
+  }),
+  commonjs({ extensions: ['.js', '.ts'] }),
+]
+const devPlugins = []
+const prodPlugins = [
+  // terser()
+]
+
+let plugins = [...basePlugins].concat(isProd ? prodPlugins : devPlugins)
+
 export default {
   input: 'index.ts',
   output: [
@@ -28,17 +55,5 @@ export default {
     }
   ],
   external: ['@gl-widget/gl-widget'],
-  plugins: [
-    glslify(),
-    typescript({ module: 'ESNext' }),
-    babel(),
-    resolve({
-      jsnext: true,
-      main: true,
-      browser: true,
-      preferBuiltins: true
-    }),
-    commonjs({ extensions: ['.js', '.ts'] }),
-    terser()
-  ]
+  plugins: plugins
 }

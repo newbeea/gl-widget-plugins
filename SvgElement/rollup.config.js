@@ -7,6 +7,26 @@ import typescript from 'rollup-plugin-typescript2';
 import {terser} from 'rollup-plugin-terser';
 import babel from 'rollup-plugin-babel';
 import builtins from 'rollup-plugin-node-builtins';
+
+let isProd = process.env.NODE_ENV === 'production'
+
+const basePlugins = [
+  typescript({ module: 'ESNext' }),
+  babel(),
+  resolve({
+    jsnext: true,
+    main: true,
+    preferBuiltins: true
+  }),
+  builtins(),
+  commonjs({ extensions: ['.js', '.ts'] }),
+]
+const devPlugins = []
+const prodPlugins = [terser()]
+
+let plugins = [...basePlugins].concat(isProd ? prodPlugins : devPlugins)
+
+
 export default {
   input: 'index.ts',
   output: [
@@ -29,19 +49,7 @@ export default {
     }
   ],
   external: ['@gl-widget/gl-widget'],
-  plugins: [
-    typescript({ module: 'ESNext' }),
-    babel(),
-    resolve({
-      jsnext: true,
-      main: true,
-      preferBuiltins: true
-    }),
-    builtins(),
-    commonjs({ extensions: ['.js', '.ts'] }),
-    terser()
-    
-  ],
+  plugins: plugins,
   onwarn (warning) {
     if (warning.code === 'MODULE_LEVEL_DIRECTIVE') return;
   }

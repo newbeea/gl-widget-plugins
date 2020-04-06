@@ -1,6 +1,6 @@
 import { RenderSide } from "@gl-widget/gl-widget";
 import { PhysicalMaterialOptions } from "./MaterialOptions";
-// import noiseShader from './shader-lib/noise.glsl'
+import physicalVertex from './shader-lib/physical-vertex.glsl'
 class PhysicalMaterial {
   vertexShader: string
   fragmentShader: string
@@ -21,7 +21,7 @@ class PhysicalMaterial {
     let shaderDefines = [
 
     ]
-    return shaderDefines.join('\n')
+    return shaderDefines.join('\n') + physicalVertex
   }
 }
 export {

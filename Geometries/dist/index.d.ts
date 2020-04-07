@@ -1,1 +1,0 @@
-export { SphereGeometry } from './SphereGeometry';

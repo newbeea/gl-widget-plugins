@@ -1,6 +1,7 @@
 import { RenderSide } from "@gl-widget/gl-widget";
 import { PhysicalMaterialOptions } from "./MaterialOptions";
 import physicalVertex from './shader-lib/physical-vertex.glsl'
+import { replaceLightNums, unrollLoops } from "./utils";
 class PhysicalMaterial {
   vertexShader: string
   fragmentShader: string
@@ -21,7 +22,14 @@ class PhysicalMaterial {
     let shaderDefines = [
 
     ]
-    return shaderDefines.join('\n') + physicalVertex
+    let defineString = shaderDefines.join('\n')
+    let vertexShader = physicalVertex
+    vertexShader = replaceLightNums(vertexShader, {
+      numDirLightShadows: 3
+    })
+    vertexShader = unrollLoops(vertexShader)
+    console.log(vertexShader)
+    return defineString + vertexShader
   }
 }
 export {

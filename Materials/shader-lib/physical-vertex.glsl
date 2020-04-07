@@ -58,7 +58,7 @@ vec3 transformed = vec3( position );
 #endif
 vec4 mvPosition = vec4( transformed, 1.0 );
 #ifdef USE_INSTANCING
-mvPosition = instanceMatrix * mvPosition;
+	mvPosition = instanceMatrix * mvPosition;
 #endif
 mvPosition = modelViewMatrix * mvPosition;
 gl_Position = projectionMatrix * mvPosition;
@@ -82,6 +82,29 @@ gl_Position = projectionMatrix * mvPosition;
 	#endif
 	worldPosition = modelMatrix * worldPosition;
 #endif
+
+
+#ifdef USE_SHADOWMAP
+	#if NUM_DIR_LIGHT_SHADOWS > 0
+	#pragma unroll_loop
+	for ( int i = 0; i < NUM_DIR_LIGHT_SHADOWS; i ++ ) {
+		vDirectionalShadowCoord[ i ] = directionalShadowMatrix[ i ] * worldPosition;
+	}
+	#endif
+	#if NUM_SPOT_LIGHT_SHADOWS > 0
+	#pragma unroll_loop
+	for ( int i = 0; i < NUM_SPOT_LIGHT_SHADOWS; i ++ ) {
+		vSpotShadowCoord[ i ] = spotShadowMatrix[ i ] * worldPosition;
+	}
+	#endif
+	#if NUM_POINT_LIGHT_SHADOWS > 0
+	#pragma unroll_loop
+	for ( int i = 0; i < NUM_POINT_LIGHT_SHADOWS; i ++ ) {
+		vPointShadowCoord[ i ] = pointShadowMatrix[ i ] * worldPosition;
+	}
+	#endif
+#endif
+
 
 vViewPosition = - mvPosition.xyz;
 

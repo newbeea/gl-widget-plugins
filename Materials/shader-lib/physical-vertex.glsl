@@ -1,12 +1,13 @@
 precision highp float;
 precision highp int;
-@import "../shader-chunk/common-uniforms.glsl";
-@import "../shader-chunk/uv-pars-vertex.glsl";
-@import "../shader-chunk/displacementmap-pars-vertex.glsl";
-@import "../shader-chunk/uv-pars-vertex.glsl";
-@import "../shader-chunk/fog-pars-vertex.glsl";
-@import "../shader-chunk/shadowmap-pars-vertex.glsl";
-@import "../shader-chunk/logdepthbuf-pars-vertex.glsl";
+
+@import "../shader-chunk/common-declarations-vertex.glsl";
+@import "../shader-chunk/uv-declarations-vertex.glsl";
+@import "../shader-chunk/displacementmap-declarations-vertex.glsl";
+@import "../shader-chunk/color-declarations-vertex.glsl";
+@import "../shader-chunk/fog-declarations-vertex.glsl";
+@import "../shader-chunk/shadowmap-declarations-vertex.glsl";
+@import "../shader-chunk/logdepthbuf-declarations-vertex.glsl";
 
 void main() {
 

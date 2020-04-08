@@ -46,6 +46,8 @@
 		#endif
 		reflectVec = inverseTransformDirection( reflectVec, viewMatrix );
 		float specularMIPLevel = getSpecularMIPLevel( roughness, maxMIPLevel );
+
+
 		#ifdef ENVMAP_TYPE_CUBE
 			vec3 queryReflectVec = vec3( flipEnvMap * reflectVec.x, reflectVec.yz );
 			#ifdef TEXTURE_LOD_EXT
@@ -54,6 +56,8 @@
 				vec4 envMapColor = textureCube( envMap, queryReflectVec, specularMIPLevel );
 			#endif
 			envMapColor.rgb = envMapTexelToLinear( envMapColor ).rgb;
+
+			
 		#elif defined( ENVMAP_TYPE_CUBE_UV )
 			vec4 envMapColor = textureCubeUV( envMap, reflectVec, roughness );
 		#elif defined( ENVMAP_TYPE_EQUIREC )

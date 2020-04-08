@@ -136,37 +136,182 @@ vec3 geometryNormal = normal;
 	vec3 clearcoatNormal = geometryNormal;
 #endif
 #ifdef USE_CLEARCOAT_NORMALMAP
-
 	vec3 clearcoatMapN = texture2D( clearcoatNormalMap, vUv ).xyz * 2.0 - 1.0;
 	clearcoatMapN.xy *= clearcoatNormalScale;
-
 	#ifdef USE_TANGENT
-
 		clearcoatNormal = normalize( vTBN * clearcoatMapN );
-
 	#else
-
 		clearcoatNormal = perturbNormal2Arb( - vViewPosition, clearcoatNormal, clearcoatMapN );
-
 	#endif
-
 #endif
 
 #ifdef USE_EMISSIVEMAP
-
 	vec4 emissiveColor = texture2D( emissiveMap, vUv );
-
 	emissiveColor.rgb = emissiveMapTexelToLinear( emissiveColor ).rgb;
-
 	totalEmissiveRadiance *= emissiveColor.rgb;
+#endif
+
+
+PhysicalMaterial material;
+material.diffuseColor = diffuseColor.rgb * ( 1.0 - metalnessFactor );
+
+vec3 dxy = max( abs( dFdx( geometryNormal ) ), abs( dFdy( geometryNormal ) ) );
+float geometryRoughness = max( max( dxy.x, dxy.y ), dxy.z );
+
+material.specularRoughness = max( roughnessFactor, 0.0525 );// 0.0525 corresponds to the base mip of a 256 cubemap.
+material.specularRoughness += geometryRoughness;
+material.specularRoughness = min( material.specularRoughness, 1.0 );
+
+#ifdef REFLECTIVITY
+	material.specularColor = mix( vec3( MAXIMUM_SPECULAR_COEFFICIENT * pow2( reflectivity ) ), diffuseColor.rgb, metalnessFactor );
+#else
+	material.specularColor = mix( vec3( DEFAULT_SPECULAR_COEFFICIENT ), diffuseColor.rgb, metalnessFactor );
+#endif
+
+#ifdef CLEARCOAT
+	material.clearcoat = saturate( clearcoat ); // Burley clearcoat model
+	material.clearcoatRoughness = max( clearcoatRoughness, 0.0525 );
+	material.clearcoatRoughness += geometryRoughness;
+	material.clearcoatRoughness = min( material.clearcoatRoughness, 1.0 );
+#endif
+#ifdef USE_SHEEN
+	material.sheenColor = sheen;
+#endif
+
+
+
+
+
+GeometricContext geometry;
+geometry.position = - vViewPosition;
+geometry.normal = normal;
+geometry.viewDir = ( isOrthographic ) ? vec3( 0, 0, 1 ) : normalize( vViewPosition );
+
+#ifdef CLEARCOAT
+	geometry.clearcoatNormal = clearcoatNormal;
+#endif
+
+IncidentLight directLight;
+#if ( NUM_POINT_LIGHTS > 0 ) && defined( RE_Direct )
+	PointLight pointLight;
+	#if defined( USE_SHADOWMAP ) && NUM_POINT_LIGHT_SHADOWS > 0
+		PointLightShadow pointLightShadow;
+	#endif
+	#pragma unroll_loop
+	for ( int i = 0; i < NUM_POINT_LIGHTS; i ++ ) {
+		pointLight = pointLights[ i ];
+		getPointDirectLightIrradiance( pointLight, geometry, directLight );
+		#if defined( USE_SHADOWMAP ) && ( UNROLLED_LOOP_INDEX < NUM_POINT_LIGHT_SHADOWS )
+			pointLightShadow = pointLightShadows[ i ];
+			directLight.color *= all( bvec2( directLight.visible, receiveShadow ) ) ? getPointShadow( pointShadowMap[ i ], pointLightShadow.shadowMapSize, pointLightShadow.shadowBias, pointLightShadow.shadowRadius, vPointShadowCoord[ i ], pointLightShadow.shadowCameraNear, pointLightShadow.shadowCameraFar ) : 1.0;
+		#endif
+		RE_Direct( directLight, geometry, material, reflectedLight );
+	}
+#endif
+
+#if ( NUM_SPOT_LIGHTS > 0 ) && defined( RE_Direct )
+	SpotLight spotLight;
+	#if defined( USE_SHADOWMAP ) && NUM_SPOT_LIGHT_SHADOWS > 0
+		SpotLightShadow spotLightShadow;
+	#endif
+	#pragma unroll_loop
+	for ( int i = 0; i < NUM_SPOT_LIGHTS; i ++ ) {
+		spotLight = spotLights[ i ];
+		getSpotDirectLightIrradiance( spotLight, geometry, directLight );
+		#if defined( USE_SHADOWMAP ) && ( UNROLLED_LOOP_INDEX < NUM_SPOT_LIGHT_SHADOWS )
+			spotLightShadow = spotLightShadows[ i ];
+			directLight.color *= all( bvec2( directLight.visible, receiveShadow ) ) ? getShadow( spotShadowMap[ i ], spotLightShadow.shadowMapSize, spotLightShadow.shadowBias, spotLightShadow.shadowRadius, vSpotShadowCoord[ i ] ) : 1.0;
+		#endif
+		RE_Direct( directLight, geometry, material, reflectedLight );
+	}
+#endif
+
+#if ( NUM_DIR_LIGHTS > 0 ) && defined( RE_Direct )
+	DirectionalLight directionalLight;
+	#if defined( USE_SHADOWMAP ) && NUM_DIR_LIGHT_SHADOWS > 0
+		DirectionalLightShadow directionalLightShadow;
+	#endif
+	#pragma unroll_loop
+	for ( int i = 0; i < NUM_DIR_LIGHTS; i ++ ) {
+		directionalLight = directionalLights[ i ];
+		getDirectionalDirectLightIrradiance( directionalLight, geometry, directLight );
+		#if defined( USE_SHADOWMAP ) && ( UNROLLED_LOOP_INDEX < NUM_DIR_LIGHT_SHADOWS )
+			directionalLightShadow = directionalLightShadows[ i ];
+			directLight.color *= all( bvec2( directLight.visible, receiveShadow ) ) ? getShadow( directionalShadowMap[ i ], directionalLightShadow.shadowMapSize, directionalLightShadow.shadowBias, directionalLightShadow.shadowRadius, vDirectionalShadowCoord[ i ] ) : 1.0;
+		#endif
+		RE_Direct( directLight, geometry, material, reflectedLight );
+	}
 
 #endif
 
-	// accumulation
-	#include <lights_physical_fragment>
-	#include <lights_fragment_begin>
-	#include <lights_fragment_maps>
-	#include <lights_fragment_end>
+#if ( NUM_RECT_AREA_LIGHTS > 0 ) && defined( RE_Direct_RectArea )
+	RectAreaLight rectAreaLight;
+	#pragma unroll_loop
+	for ( int i = 0; i < NUM_RECT_AREA_LIGHTS; i ++ ) {
+		rectAreaLight = rectAreaLights[ i ];
+		RE_Direct_RectArea( rectAreaLight, geometry, material, reflectedLight );
+	}
+#endif
+
+
+#if defined( RE_IndirectDiffuse )
+	vec3 iblIrradiance = vec3( 0.0 );
+	vec3 irradiance = getAmbientLightIrradiance( ambientLightColor );
+	irradiance += getLightProbeIrradiance( lightProbe, geometry );
+	#if ( NUM_HEMI_LIGHTS > 0 )
+		#pragma unroll_loop
+		for ( int i = 0; i < NUM_HEMI_LIGHTS; i ++ ) {
+			irradiance += getHemisphereLightIrradiance( hemisphereLights[ i ], geometry );
+		}
+	#endif
+#endif
+
+#if defined( RE_IndirectSpecular )
+	vec3 radiance = vec3( 0.0 );
+	vec3 clearcoatRadiance = vec3( 0.0 );
+#endif
+
+
+
+
+
+#if defined( RE_IndirectDiffuse )
+	#ifdef USE_LIGHTMAP
+		vec4 lightMapTexel= texture2D( lightMap, vUv2 );
+		vec3 lightMapIrradiance = lightMapTexelToLinear( lightMapTexel ).rgb * lightMapIntensity;
+		#ifndef PHYSICALLY_CORRECT_LIGHTS
+			lightMapIrradiance *= PI; // factor of PI should not be present; included here to prevent breakage
+		#endif
+		irradiance += lightMapIrradiance;
+	#endif
+
+	#if defined( USE_ENVMAP ) && defined( STANDARD ) && defined( ENVMAP_TYPE_CUBE_UV )
+		iblIrradiance += getLightProbeIndirectIrradiance( /*lightProbe,*/ geometry, maxMipLevel );
+	#endif
+#endif
+
+#if defined( USE_ENVMAP ) && defined( RE_IndirectSpecular )
+	radiance += getLightProbeIndirectRadiance( /*specularLightProbe,*/ geometry.viewDir, geometry.normal, material.specularRoughness, maxMipLevel );
+	#ifdef CLEARCOAT
+		clearcoatRadiance += getLightProbeIndirectRadiance( /*specularLightProbe,*/ geometry.viewDir, geometry.clearcoatNormal, material.clearcoatRoughness, maxMipLevel );
+	#endif
+#endif
+
+
+
+
+
+#if defined( RE_IndirectDiffuse )
+	RE_IndirectDiffuse( irradiance, geometry, material, reflectedLight );
+#endif
+#if defined( RE_IndirectSpecular )
+	RE_IndirectSpecular( radiance, iblIrradiance, clearcoatRadiance, geometry, material, reflectedLight );
+#endif
+
+
+
+
+
 
 #ifdef USE_AOMAP
 	// reads channel R, compatible with a combined OcclusionRoughnessMetallic (RGB) texture

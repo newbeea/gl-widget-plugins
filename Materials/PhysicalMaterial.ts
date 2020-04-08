@@ -13,8 +13,11 @@ class PhysicalMaterial {
     this.vertexShader = this.getVertexShader(options)
     this.fragmentShader = this.getFragmentShader(options)
     this.uniforms = {
-      color: {
-        value: new Vector3()
+      diffuse: {
+        value: new Vector3(1, 0, 0)
+      },
+      env: {
+        value: null
       }
     }
     this.side = RenderSide.DOUBLE
@@ -25,7 +28,6 @@ class PhysicalMaterial {
       '#extension GL_OES_standard_derivatives : enable',
       'precision highp float;',
       'precision highp int;',
-      '#define USE_UV',
       '#define USE_COLOR'
     ]
     let defineString = shaderDefines.join('\n')
@@ -56,8 +58,6 @@ class PhysicalMaterial {
     let shaderDefines = [
       '#extension GL_OES_standard_derivatives : enable',
       'precision highp float;',
-      'precision highp int;',
-      '#define USE_UV',
       '#define USE_COLOR'
     ]
     let defineString = shaderDefines.join('\n')

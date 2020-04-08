@@ -345,5 +345,5 @@ IncidentLight directLight;
 #ifdef DITHERING
 	gl_FragColor.rgb = dithering( gl_FragColor.rgb );
 #endif
-// gl_FragColor = vec4(vColor);
+// gl_FragColor = vec4(diffuse, 1.);
 }

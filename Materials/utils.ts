@@ -1,3 +1,4 @@
+
 function replaceLightNums(string, parameters) {
   return string
     .replace(/NUM_DIR_LIGHTS/g, parameters.numDirLights || 0)
@@ -10,6 +11,19 @@ function replaceLightNums(string, parameters) {
     .replace(/NUM_POINT_LIGHT_SHADOWS/g, parameters.numPointLightShadows || 0);
 }
 
+
+function replaceTonemapping (string, functionString) {
+  return string.replace(/#pragma TONEMAPPING_FUNCTION/g, functionString)
+}
+function replaceColorspace (string, functionString) {
+  return string.replace(/#pragma COLORSPACE_FUNCTIONS/g, functionString)
+}
+function replaceClippingPlanes (string, clippingPlanes, clipIntersections) {
+  return string
+  .replace(/NUM_CLIPPING_PLANES/g, clippingPlanes)
+  .replace(/UNION_CLIPPING_PLANES/g, clipIntersections)
+  
+}
 function unrollLoops(string) {
   var loopPattern = /#pragma unroll_loop[\s]+?for \( int i \= (\d+)\; i < (\d+)\; i \+\+ \) \{([\s\S]+?)(?=\})\}/g;
   return string.replace(loopPattern, loopReplacer);
@@ -27,5 +41,8 @@ function loopReplacer(match, start, end, snippet) {
 
 export {
   replaceLightNums,
+  replaceTonemapping,
+  replaceColorspace,
+  replaceClippingPlanes,
   unrollLoops
 }

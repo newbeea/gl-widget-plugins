@@ -1,7 +1,8 @@
-import { RenderSide } from "@gl-widget/gl-widget";
+import { RenderSide, Vector3, Matrix4 } from "@gl-widget/gl-widget";
 import { PhysicalMaterialOptions } from "./MaterialOptions";
 import physicalVertex from './shader-lib/physical-vertex.glsl'
-import { replaceLightNums, unrollLoops } from "./utils";
+import physicalFragment from './shader-lib/physical-fragment.glsl'
+import { replaceLightNums, unrollLoops, replaceTonemapping, replaceColorspace, replaceClippingPlanes } from "./utils";
 class PhysicalMaterial {
   vertexShader: string
   fragmentShader: string
@@ -10,22 +11,59 @@ class PhysicalMaterial {
   transparent = false 
   constructor (options: PhysicalMaterialOptions = {}) {
     this.vertexShader = this.getVertexShader(options)
-    this.fragmentShader = ''
+    this.fragmentShader = this.getFragmentShader(options)
     this.uniforms = {
-
-
+      color: {
+        value: new Vector3()
+      }
     }
     this.side = RenderSide.DOUBLE
 
   }
+  getFragmentShader(options: PhysicalMaterialOptions) {
+    let shaderDefines = [
+      '#extension GL_OES_standard_derivatives : enable',
+      'precision highp float;',
+      'precision highp int;',
+      '#define USE_UV',
+      '#define USE_COLOR'
+    ]
+    let defineString = shaderDefines.join('\n')
+    let fragmentShader = physicalFragment
+    fragmentShader = replaceLightNums(fragmentShader, {
+      // numDirLightShadows: 3
+    })
+    fragmentShader = unrollLoops(fragmentShader)
+    fragmentShader = replaceTonemapping(fragmentShader, `
+      vec3 toneMapping( vec3 color ) { return LinearToneMapping( color ); }
+    `)
+
+    fragmentShader = replaceColorspace(fragmentShader, `
+      vec4 mapTexelToLinear( vec4 value ) { return LinearToLinear( value ); }
+      vec4 matcapTexelToLinear( vec4 value ) { return LinearToLinear( value ); }
+      vec4 envMapTexelToLinear( vec4 value ) { return LinearToLinear( value ); }
+      vec4 emissiveMapTexelToLinear( vec4 value ) { return LinearToLinear( value ); }
+      vec4 lightMapTexelToLinear( vec4 value ) { return LinearToLinear( value ); }
+      vec4 linearToOutputTexel( vec4 value ) { return LinearToLinear( value ); }
+    `)
+    
+    fragmentShader = replaceClippingPlanes(fragmentShader, 0, 0)
+    
+    console.log(fragmentShader)
+    return defineString + fragmentShader
+  }
   getVertexShader(options: PhysicalMaterialOptions) {
     let shaderDefines = [
-
+      '#extension GL_OES_standard_derivatives : enable',
+      'precision highp float;',
+      'precision highp int;',
+      '#define USE_UV',
+      '#define USE_COLOR'
     ]
     let defineString = shaderDefines.join('\n')
     let vertexShader = physicalVertex
     vertexShader = replaceLightNums(vertexShader, {
-      numDirLightShadows: 3
+      // numDirLightShadows: 3
     })
     vertexShader = unrollLoops(vertexShader)
     console.log(vertexShader)

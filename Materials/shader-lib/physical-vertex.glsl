@@ -1,5 +1,3 @@
-precision highp float;
-precision highp int;
 
 @import "../shader-chunk/common-declarations-vertex.glsl";
 @import "../shader-chunk/uv-declarations-vertex.glsl";

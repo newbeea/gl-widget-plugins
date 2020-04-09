@@ -51,8 +51,32 @@ class PhysicalMaterial {
       },
       toneMappingWhitePoint: {
         value: 1
+      },
+      lightProbe: {
+        value: [
+          new Vector3(1, 0, 0), 
+          new Vector3(1, 0, 0), 
+          new Vector3(1, 0, 0), 
+          new Vector3(1, 0, 0), 
+          new Vector3(1, 0, 0), 
+          new Vector3(1, 0, 0), 
+          new Vector3(1, 0, 0), 
+          new Vector3(1, 0, 0), 
+          new Vector3(1, 0, 0), 
+        ]
+      },
+      pointLights: {
+        value: [
+          {
+            position: new Vector3(10, -10, 10),
+            color: new Vector3(1, 0, 0),
+            distance: 100,
+            decay: 1
+          }
+        ]
       }
     }
+
     this.options = Object.assign({
       toneMapping: ToneMapping.LinearToneMapping,
       outputEncoding: Encoding.sRGBEncoding
@@ -172,7 +196,7 @@ class PhysicalMaterial {
     let defineString = shaderDefines.join('\n')
     let fragmentShader = physicalFragment
     fragmentShader = replaceLightNums(fragmentShader, {
-      // numDirLightShadows: 3
+      numPointLights: 1
     })
     fragmentShader = unrollLoops(fragmentShader)
     let toneMappingFunction = getToneMappingFunction(this.options.toneMapping)
@@ -208,7 +232,7 @@ class PhysicalMaterial {
     let defineString = shaderDefines.join('\n')
     let vertexShader = physicalVertex
     vertexShader = replaceLightNums(vertexShader, {
-      // numDirLightShadows: 3
+      numPointLights: 1
     })
     vertexShader = unrollLoops(vertexShader)
 

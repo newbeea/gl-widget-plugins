@@ -28,7 +28,7 @@ const basePlugins = [
 ]
 const devPlugins = []
 const prodPlugins = [
-  // terser()
+  terser()
 ]
 
 let plugins = [...basePlugins].concat(isProd ? prodPlugins : devPlugins)

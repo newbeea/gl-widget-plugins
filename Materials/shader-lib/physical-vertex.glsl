@@ -8,7 +8,7 @@
 @import "../shader-chunk/logdepthbuf-declarations-vertex.glsl";
 
 void main() {
-
+//计算传递UV attribute
 #ifdef USE_UV
 	vUv = ( uvTransform * vec3( uv, 1 ) ).xy;
 #endif
@@ -16,7 +16,7 @@ void main() {
 	vUv2 = ( uv2Transform * vec3( uv2, 1 ) ).xy;
 #endif
 
-
+//传递color attribute
 #ifdef USE_COLOR
 	vColor = color;
 #endif
@@ -26,6 +26,7 @@ void main() {
 	vec3 objectTangent = vec3( tangent.xyz );
 #endif
 
+// 变换传递法线，如果有tangent信息，变换并计算biTangent
 vec3 objectNormal = vec3( normal );
 vec3 transformedNormal = objectNormal;
 #ifdef USE_INSTANCING
@@ -50,7 +51,7 @@ vec3 transformedNormal = objectNormal;
 	#endif
 #endif
 
-
+// 计算位置
 vec3 transformed = vec3( position );
 #ifdef USE_DISPLACEMENTMAP
 	transformed += normalize( objectNormal ) * ( texture2D( displacementMap, vUv ).x * displacementScale + displacementBias );
@@ -61,6 +62,8 @@ vec4 mvPosition = vec4( transformed, 1.0 );
 #endif
 mvPosition = modelViewMatrix * mvPosition;
 gl_Position = projectionMatrix * mvPosition;
+
+// 自定义深度缓存
 #ifdef USE_LOGDEPTHBUF
 	#ifdef USE_LOGDEPTHBUF_EXT
 		vFragDepth = 1.0 + gl_Position.w;
@@ -82,7 +85,7 @@ gl_Position = projectionMatrix * mvPosition;
 	worldPosition = modelMatrix * worldPosition;
 #endif
 
-
+// shadowmap 展开循环并对shadow coord赋值
 #ifdef USE_SHADOWMAP
 	#if NUM_DIR_LIGHT_SHADOWS > 0
 	#pragma unroll_loop
@@ -104,7 +107,7 @@ gl_Position = projectionMatrix * mvPosition;
 	#endif
 #endif
 
-
+// 相机空间点坐标
 vViewPosition = - mvPosition.xyz;
 
 #ifdef USE_FOG

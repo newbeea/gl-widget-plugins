@@ -5,28 +5,28 @@ class BlinnPhongMaterial {
   vertexShader: string;
   constructor (options:any = {}) {
     this.vertexShader = `
-      attribute vec4 position;
-      attribute vec4 normal;
+      attribute vec3 position;
+      attribute vec3 normal;
       attribute vec2 uv                                                                                                                                                                                                                                                                                                                       ;
       varying vec2 vUv;
-      varying vec4 vNormal;
-      varying vec4 vPosition;
+      varying vec3 vNormal;
+      varying vec3 vPosition;
       uniform mat3 uvTransform;
       uniform mat4 mvpMatrix;
-  
+
       void main () {
-        gl_Position = mvpMatrix*position;
-        vPosition = gl_Position;
+        gl_Position = mvpMatrix*vec4(position, 1.);
+        vPosition = gl_Position.xyz;
         vNormal = normal;
         vUv = ( uvTransform * vec3( uv, 1 ) ).xy;
       }
     `
     this.fragmentShader = `
       precision mediump float;
-      varying vec4 vPosition;
-      varying vec4 vNormal; 
+      varying vec3 vPosition;
+      varying vec3 vNormal; 
       varying vec2 vUv;
-  
+
       uniform vec3 globalAmbient; //入射环境光颜色
       uniform vec3 lightColor; //灯光颜色
       uniform vec3 lightPosition; //灯光的位置
@@ -37,10 +37,10 @@ class BlinnPhongMaterial {
       uniform vec3 Ks;          //Ks是材质的镜面反射颜色
       uniform float shininess;     //材质表面光泽度
       void main() {
-  
+
         vec3 N = vNormal.xyz; 
         vec3 P = vPosition.xyz;
-  
+
         //公式一计算放射光
         vec3 emissive = Ke; 
         
@@ -67,7 +67,7 @@ class BlinnPhongMaterial {
         color.xyz = emissive + ambient + diffuse + specular;
         
         color.w = 1.0;
-        gl_FragColor = color;
+        gl_FragColor = vec4(N, 1.);
       }
     `
     this.uniforms =  {

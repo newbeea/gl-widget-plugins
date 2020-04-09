@@ -5,7 +5,6 @@
 @import "../shader-chunk/colorspace-declarations-fragment.glsl";
 
 
-
 @import "../shader-chunk/packing-declarations-fragment.glsl";
 @import "../shader-chunk/dithering-declarations-fragment.glsl";
 @import "../shader-chunk/color-declarations-fragment.glsl";

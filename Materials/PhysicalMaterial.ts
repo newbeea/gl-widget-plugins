@@ -4,6 +4,7 @@ import physicalVertex from './shader-lib/physical-vertex.glsl'
 import physicalFragment from './shader-lib/physical-fragment.glsl'
 import { replaceLightNums, unrollLoops, replaceTonemapping, replaceColorspace, replaceClippingPlanes, getToneMappingFunction, getTexelDecodingFunction, getTexelEncodingFunction } from "./utils";
 import { ToneMapping } from "./Constants";
+import { Lights } from "./Lights";
 class PhysicalMaterial {
   vertexShader: string
   fragmentShader: string
@@ -18,6 +19,9 @@ class PhysicalMaterial {
     this.uniforms = {
       diffuse: {
         value: new Vector3(1, 1, 1)
+      },
+      ambientLightColor: {
+        value: new Vector3(0, 0, 0)
       },
       map: {
         value: null
@@ -52,27 +56,12 @@ class PhysicalMaterial {
       toneMappingWhitePoint: {
         value: 1
       },
-      lightProbe: {
-        value: [
-          new Vector3(1, 0, 0), 
-          new Vector3(1, 0, 0), 
-          new Vector3(1, 0, 0), 
-          new Vector3(1, 0, 0), 
-          new Vector3(1, 0, 0), 
-          new Vector3(1, 0, 0), 
-          new Vector3(1, 0, 0), 
-          new Vector3(1, 0, 0), 
-          new Vector3(1, 0, 0), 
+      directionalLights: {
+        value:[
         ]
       },
       pointLights: {
         value: [
-          {
-            position: new Vector3(10, -10, 10),
-            color: new Vector3(1, 0, 0),
-            distance: 100,
-            decay: 1
-          }
         ]
       }
     }
@@ -82,6 +71,9 @@ class PhysicalMaterial {
       outputEncoding: Encoding.sRGBEncoding
     }, options)
     this.update()
+  }
+  setLights (lights: Lights) {
+    Object.assign(this.uniforms, lights.uniforms)
   }
   update (options: PhysicalMaterialOptions = {}) {
     Object.assign(this.options, options)
@@ -97,8 +89,6 @@ class PhysicalMaterial {
 		this.parameters = {
 			defines: this.defines,
 
-			isShaderMaterial: true,
-
 			precision: 'highp',
 
 			instancing: options.isInstanced === true,
@@ -109,7 +99,7 @@ class PhysicalMaterial {
 			envMap: !! this.uniforms.envMap.value,
 			// envMapMode: envMap && envMap.mapping,
 			envMapEncoding: this.getTextureEncodingFromMap( this.uniforms.envMap.value ),
-			envMapCubeUV: true,
+			envMapCubeUV: false,
       outputEncoding: this.options.outputEncoding,
 			normalMap: !! this.uniforms.normalMap.value,
 			objectSpaceNormalMap: false,
@@ -196,7 +186,8 @@ class PhysicalMaterial {
     let defineString = shaderDefines.join('\n')
     let fragmentShader = physicalFragment
     fragmentShader = replaceLightNums(fragmentShader, {
-      numPointLights: 1
+      numPointLights: this.uniforms.pointLights.value.length,
+      numDirLights: this.uniforms.directionalLights.value.length,
     })
     fragmentShader = unrollLoops(fragmentShader)
     let toneMappingFunction = getToneMappingFunction(this.options.toneMapping)
@@ -232,7 +223,8 @@ class PhysicalMaterial {
     let defineString = shaderDefines.join('\n')
     let vertexShader = physicalVertex
     vertexShader = replaceLightNums(vertexShader, {
-      numPointLights: 1
+      numPointLights: this.uniforms.pointLights.value.length,
+      numDirLights: this.uniforms.directionalLights.value.length,
     })
     vertexShader = unrollLoops(vertexShader)
 

@@ -44,6 +44,9 @@ class PhysicalMaterial {
       normalMap: {
         value: null
       },
+      normalScale: {
+        value: new Vector2(1, 1)
+      },
       envMapIntensity: {
         value: 1
       },
@@ -78,6 +81,9 @@ class PhysicalMaterial {
       },
       uvTransform: {
         value:this.uvTransform
+      },
+      sheen: {
+        value: null
       }
     }
 
@@ -115,7 +121,7 @@ class PhysicalMaterial {
 
 			instancing: options.isInstanced === true,
 
-			map:true,
+			map: !! this.uniforms.map.value,
 			mapEncoding: this.getTextureEncodingFromMap(  this.uniforms.map.value ),
 
 			envMap: !! this.uniforms.envMap.value,
@@ -124,8 +130,7 @@ class PhysicalMaterial {
 			envMapCubeUV: false,
       outputEncoding: this.options.outputEncoding,
 			normalMap: !! this.uniforms.normalMap.value,
-			objectSpaceNormalMap: false,
-			tangentSpaceNormalMap: true,
+
 			// clearcoatNormalMap: !! this.uniforms.clearcoatNormalMap.value,
 			// displacementMap: !! this.uniforms.displacementMap.value,
 			// roughnessMap: !! this.uniforms.roughnessMap.value,
@@ -135,7 +140,7 @@ class PhysicalMaterial {
 
 			// gradientMap: !! this.uniforms.gradientMap.value,
 
-			// sheen: !! this.uniforms.sheen.value,
+			sheen: !! this.uniforms.sheen.value,
 
 	
       
@@ -204,7 +209,22 @@ class PhysicalMaterial {
 			parameters.envMap ? '#define USE_ENVMAP' : '',
 			parameters.envMap ? '#define ' + envMapTypeDefine : '',
 			parameters.envMap ? '#define ' + envMapModeDefine : '',
-			parameters.envMap ? '#define ' + envMapBlendingDefine : '',
+      parameters.envMap ? '#define ' + envMapBlendingDefine : '',
+
+      parameters.lightMap ? '#define USE_LIGHTMAP' : '',
+			parameters.aoMap ? '#define USE_AOMAP' : '',
+			parameters.emissiveMap ? '#define USE_EMISSIVEMAP' : '',
+			parameters.bumpMap ? '#define USE_BUMPMAP' : '',
+      parameters.normalMap ? '#define USE_NORMALMAP' : '',
+      parameters.normalMap ? '#define TANGENTSPACE_NORMALMAP' : '',
+			parameters.clearcoatNormalMap ? '#define USE_CLEARCOAT_NORMALMAP' : '',
+			parameters.displacementMap && parameters.supportsVertexTextures ? '#define USE_DISPLACEMENTMAP' : '',
+			parameters.specularMap ? '#define USE_SPECULARMAP' : '',
+			parameters.roughnessMap ? '#define USE_ROUGHNESSMAP' : '',
+			parameters.metalnessMap ? '#define USE_METALNESSMAP' : '',
+      parameters.alphaMap ? '#define USE_ALPHAMAP' : '',
+      
+      parameters.sheen ? '#define USE_SHEEN' : '',
     ]
     let defineString = shaderDefines.join('\n')
     let fragmentShader = physicalFragment
@@ -244,6 +264,21 @@ class PhysicalMaterial {
       parameters.map ? '#define USE_MAP' : '',
       parameters.envMap ? '#define USE_ENVMAP' : '',
       parameters.envMap ? '#define ' + envMapModeDefine : '',
+
+      parameters.lightMap ? '#define USE_LIGHTMAP' : '',
+			parameters.aoMap ? '#define USE_AOMAP' : '',
+			parameters.emissiveMap ? '#define USE_EMISSIVEMAP' : '',
+			parameters.bumpMap ? '#define USE_BUMPMAP' : '',
+			parameters.normalMap ? '#define USE_NORMALMAP' : '',
+			parameters.normalMap ? '#define TANGENTSPACE_NORMALMAP' : '',
+			parameters.clearcoatNormalMap ? '#define USE_CLEARCOAT_NORMALMAP' : '',
+			parameters.displacementMap && parameters.supportsVertexTextures ? '#define USE_DISPLACEMENTMAP' : '',
+			parameters.specularMap ? '#define USE_SPECULARMAP' : '',
+			parameters.roughnessMap ? '#define USE_ROUGHNESSMAP' : '',
+			parameters.metalnessMap ? '#define USE_METALNESSMAP' : '',
+      parameters.alphaMap ? '#define USE_ALPHAMAP' : '',
+      
+      parameters.sheen ? '#define USE_SHEEN' : '',
     ]
     let defineString = shaderDefines.join('\n')
     let vertexShader = physicalVertex

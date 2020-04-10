@@ -1,4 +1,4 @@
-import { RenderSide, Vector3, Matrix4, Encoding } from "@gl-widget/gl-widget";
+import { RenderSide, Vector3, Matrix3, Vector2, Encoding } from "@gl-widget/gl-widget";
 import { PhysicalMaterialOptions } from "./MaterialOptions";
 import physicalVertex from './shader-lib/physical-vertex.glsl'
 import physicalFragment from './shader-lib/physical-fragment.glsl'
@@ -14,8 +14,20 @@ class PhysicalMaterial {
   defines: Array<string> = [];
   parameters: any
   options: PhysicalMaterialOptions
+
+  rotation: number;
+  center: Vector2;
+  repeat: Vector2;
+  offset: Vector2;
+  uvTransform: Matrix3;
   constructor (options: PhysicalMaterialOptions = {}) {
-    
+    this.offset = new Vector2( 0, 0 );
+    this.repeat = new Vector2( 1, 1 );
+    this.center = new Vector2( 0, 0 );
+    this.rotation = 0;
+    this.uvTransform = new Matrix3()
+
+
     this.uniforms = {
       diffuse: {
         value: new Vector3(1, 1, 1)
@@ -63,8 +75,13 @@ class PhysicalMaterial {
       pointLights: {
         value: [
         ]
+      },
+      uvTransform: {
+        value:this.uvTransform
       }
     }
+
+
 
     this.options = Object.assign({
       toneMapping: ToneMapping.LinearToneMapping,
@@ -75,8 +92,13 @@ class PhysicalMaterial {
   setLights (lights: Lights) {
     Object.assign(this.uniforms, lights.uniforms)
   }
+  updateUvTransform () {
+    this.uvTransform.setUvTransform( this.offset.x, this.offset.y, this.repeat.x, this.repeat.y, this.rotation, this.center.x, this.center.y );
+    this.uniforms.uvTransform.value = this.uvTransform
+  }
   update (options: PhysicalMaterialOptions = {}) {
     Object.assign(this.options, options)
+    this.updateUvTransform()
     this.getParameters()
     this.vertexShader = this.getVertexShader()
     this.fragmentShader = this.getFragmentShader()
@@ -93,8 +115,8 @@ class PhysicalMaterial {
 
 			instancing: options.isInstanced === true,
 
-			map: !! this.uniforms.map.value,
-			// mapEncoding: getTextureEncodingFromMap( material.map ),
+			map:true,
+			mapEncoding: this.getTextureEncodingFromMap(  this.uniforms.map.value ),
 
 			envMap: !! this.uniforms.envMap.value,
 			// envMapMode: envMap && envMap.mapping,
@@ -116,8 +138,7 @@ class PhysicalMaterial {
 			// sheen: !! this.uniforms.sheen.value,
 
 	
-      vertexUvs: true,
-      uvsVertexOnly: false,
+      
       fog: !! options.fog,
 			useFog: options.fog,
 			fogExp2: true,
@@ -158,7 +179,8 @@ class PhysicalMaterial {
 			depthPacking: false,
 
 			index0AttributeName: undefined,
-		};
+    };
+    this.parameters.vertexUvs = this.parameters.map || this.parameters.normalMap
 
 	};
   getFragmentShader() {
@@ -177,6 +199,7 @@ class PhysicalMaterial {
       '#define TEXTURE_LOD_EXT',
       parameters.toneMapping ? '#define TONE_MAPPING' : '',
       parameters.doubleSided ? '#define DOUBLE_SIDED' : '',
+      parameters.vertexUvs ? '#define USE_UV' : '',
       parameters.map ? '#define USE_MAP' : '',
 			parameters.envMap ? '#define USE_ENVMAP' : '',
 			parameters.envMap ? '#define ' + envMapTypeDefine : '',
@@ -195,6 +218,7 @@ class PhysicalMaterial {
 
     fragmentShader = replaceColorspace(fragmentShader, `
       // ${getTexelDecodingFunction('matcapTexelToLinear', parameters.envMapEncoding)}
+			${getTexelDecodingFunction( 'mapTexelToLinear', parameters.mapEncoding )}
       ${getTexelDecodingFunction('envMapTexelToLinear', parameters.envMapEncoding)}
       // ${getTexelDecodingFunction('emissiveMapTexelToLinear', parameters.envMapEncoding)}
       // ${getTexelDecodingFunction('lightMapTexelToLinear', parameters.envMapEncoding)}
@@ -216,6 +240,7 @@ class PhysicalMaterial {
       '#define PHYSICAL',
   
       parameters.doubleSided ? '#define DOUBLE_SIDED' : '',
+      parameters.vertexUvs ? '#define USE_UV' : '',
       parameters.map ? '#define USE_MAP' : '',
       parameters.envMap ? '#define USE_ENVMAP' : '',
       parameters.envMap ? '#define ' + envMapModeDefine : '',

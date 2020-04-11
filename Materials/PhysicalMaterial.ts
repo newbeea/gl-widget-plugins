@@ -60,10 +60,10 @@ class PhysicalMaterial {
 
     this.uniforms = {
       diffuse: {
-        value: new Vector3(1, 1, 1)
+        value: new Vector3(0, 0, 0)
       },
       ambientLightColor: {
-        value: new Vector3(0.5, 0.5, 0.5)
+        value: new Vector3(0, 0, 0)
       },
       map: {
         value: null,
@@ -80,6 +80,9 @@ class PhysicalMaterial {
       aoMap: {
         value: null,
         needsRecompile: true
+      },
+      aoMapIntensity: {
+        value: 1
       },
       specularMap: {
         value: null,

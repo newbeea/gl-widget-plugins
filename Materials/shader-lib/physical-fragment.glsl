@@ -19,6 +19,7 @@
 @import "../shader-chunk/bumpmap-declarations-fragment.glsl";
 @import "../shader-chunk/normalmap-declarations-fragment.glsl";
 @import "../shader-chunk/roughnessmap-declarations-fragment.glsl";
+@import "../shader-chunk/metalnessmap-declarations-fragment.glsl";
 @import "../shader-chunk/logdepthbuf-declarations-fragment.glsl";
 @import "../shader-chunk/clipping-declarations-fragment.glsl";
 

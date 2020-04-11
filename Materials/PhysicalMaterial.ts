@@ -5,7 +5,10 @@ import physicalFragment from './shader-lib/physical-fragment.glsl'
 import { replaceLightNums, unrollLoops, replaceTonemapping, replaceColorspace, replaceClippingPlanes, getToneMappingFunction, getTexelDecodingFunction, getTexelEncodingFunction } from "./utils";
 import { ToneMapping } from "./Constants";
 import { Lights } from "./Lights";
+import { open } from "fs";
+import { Light } from "./Light";
 class PhysicalMaterial {
+  lights: Lights;
   vertexShader: string
   fragmentShader: string
   uniforms: any
@@ -20,29 +23,82 @@ class PhysicalMaterial {
   repeat: Vector2;
   offset: Vector2;
   uvTransform: Matrix3;
-  constructor (options: PhysicalMaterialOptions = {}) {
-    this.offset = new Vector2( 0, 0 );
-    this.repeat = new Vector2( 1, 1 );
-    this.center = new Vector2( 0, 0 );
-    this.rotation = 0;
-    this.uvTransform = new Matrix3()
+  
+  updateUniforms(options, force) {
+    let needsRecompile = false
+    for(let option in options) {
+      if (this.uniforms[option]) {
+        if (this.uniforms[option].needsRecompile && this.uniforms[option].value != options[option]) {
+          needsRecompile = true
+        }
+        this.uniforms[option].value = options[option]
+        console.log( options[option])
+        
+      }
+    }
 
+    if (force || needsRecompile) {
+      this.compile()
+    }
+    this.updateUvTransform()
+    
+  }
+  compile () {
+    this.getParameters()
+      this.vertexShader = this.getVertexShader()
+      this.fragmentShader = this.getFragmentShader()
+  }
+  constructor (options: PhysicalMaterialOptions = {}) {
+    this.options = Object.assign({
+      offset: new Vector2( 0, 0 ),
+      repeat: new Vector2( 1, 1 ),
+      center: new Vector2( 0, 0 ),
+      rotation: 0,
+      toneMapping: ToneMapping.LinearToneMapping,
+      outputEncoding: Encoding.sRGBEncoding
+    }, options)
 
     this.uniforms = {
       diffuse: {
         value: new Vector3(1, 1, 1)
       },
       ambientLightColor: {
-        value: new Vector3(0, 0, 0)
+        value: new Vector3(0.5, 0.5, 0.5)
       },
       map: {
-        value: null
+        value: null,
+        needsRecompile: true
       },
       envMap: {
-        value: null
+        value: null,
+        needsRecompile: true
       },
       normalMap: {
-        value: null
+        value: null,
+        needsRecompile: true
+      },
+      aoMap: {
+        value: null,
+        needsRecompile: true
+      },
+      specularMap: {
+        value: null,
+        needsRecompile: true
+      },
+      roughnessMap: {
+        value: null,
+        needsRecompile: true
+      },
+      metalnessMap: {
+        value: null,
+        needsRecompile: true
+      },
+      emissive: {
+        value: new Vector3(0, 0, 0)
+      },
+      emissiveMap: {
+        value: null,
+        needsRecompile: true
       },
       normalScale: {
         value: new Vector2(1, 1)
@@ -53,6 +109,12 @@ class PhysicalMaterial {
       opacity: {
         value: 1
       },
+      transparency: {
+        value: 0
+      },
+      reflectivity: {
+        value: 0
+      },
       roughness: {
         value: 0
       },
@@ -60,7 +122,8 @@ class PhysicalMaterial {
         value: 1
       },
       flipEnvMap: {
-        value: -1
+        value: -1,
+        needsRecompile: true
       },
       maxMipLevel: {
         value: 10
@@ -80,7 +143,7 @@ class PhysicalMaterial {
         ]
       },
       uvTransform: {
-        value:this.uvTransform
+        value: new Matrix3()
       },
       sheen: {
         value: null
@@ -89,28 +152,32 @@ class PhysicalMaterial {
 
 
 
-    this.options = Object.assign({
-      toneMapping: ToneMapping.LinearToneMapping,
-      outputEncoding: Encoding.sRGBEncoding
-    }, options)
-    this.update()
+    
+    this.update(this.options, true)
   }
   setLights (lights: Lights) {
+    this.lights = lights
     Object.assign(this.uniforms, lights.uniforms)
+    this.compile()
   }
   updateUvTransform () {
-    this.uvTransform.setUvTransform( this.offset.x, this.offset.y, this.repeat.x, this.repeat.y, this.rotation, this.center.x, this.center.y );
-    this.uniforms.uvTransform.value = this.uvTransform
+    this.uniforms.uvTransform.value.setUvTransform( 
+      this.options.offset.x, 
+      this.options.offset.y, 
+      this.options.repeat.x, 
+      this.options.repeat.y, 
+      this.options.rotation, 
+      this.options.center.x, 
+      this.options.center.y )
   }
-  update (options: PhysicalMaterialOptions = {}) {
+  update (options: PhysicalMaterialOptions = {}, force: boolean = false) {
     Object.assign(this.options, options)
-    this.updateUvTransform()
-    this.getParameters()
-    this.vertexShader = this.getVertexShader()
-    this.fragmentShader = this.getFragmentShader()
+    console.log(this.options, options)
+    this.updateUniforms(options, force)
+
   }
   getTextureEncodingFromMap (map) {
-    return Encoding.sRGBEncoding
+    return map ? map.encoding : ''
   }
   getParameters () {
     let options = this.options
@@ -133,9 +200,11 @@ class PhysicalMaterial {
 
 			// clearcoatNormalMap: !! this.uniforms.clearcoatNormalMap.value,
 			// displacementMap: !! this.uniforms.displacementMap.value,
-			// roughnessMap: !! this.uniforms.roughnessMap.value,
-			// metalnessMap: !! this.uniforms.metalnessMap.value,
-			// specularMap: !! this.uniforms.specularMap.value,
+			roughnessMap: !! this.uniforms.roughnessMap.value,
+			metalnessMap: !! this.uniforms.metalnessMap.value,
+      specularMap: !! this.uniforms.specularMap.value,
+      aoMap: !! this.uniforms.aoMap.value,
+      emissiveMap: !! this.uniforms.emissiveMap.value,
 			// alphaMap: !! this.uniforms.alphaMap.value,
 
 			// gradientMap: !! this.uniforms.gradientMap.value,
@@ -185,7 +254,13 @@ class PhysicalMaterial {
 
 			index0AttributeName: undefined,
     };
-    this.parameters.vertexUvs = this.parameters.map || this.parameters.normalMap
+    this.parameters.vertexUvs = this.parameters.map 
+    || this.parameters.normalMap
+    || this.parameters.emissiveMap
+    || this.parameters.aoMap
+    || this.parameters.roughnessMap
+    || this.parameters.metalnessMap
+
 
 	};
   getFragmentShader() {
@@ -240,7 +315,7 @@ class PhysicalMaterial {
       // ${getTexelDecodingFunction('matcapTexelToLinear', parameters.envMapEncoding)}
 			${getTexelDecodingFunction( 'mapTexelToLinear', parameters.mapEncoding )}
       ${getTexelDecodingFunction('envMapTexelToLinear', parameters.envMapEncoding)}
-      // ${getTexelDecodingFunction('emissiveMapTexelToLinear', parameters.envMapEncoding)}
+      ${getTexelDecodingFunction('emissiveMapTexelToLinear', parameters.envMapEncoding)}
       // ${getTexelDecodingFunction('lightMapTexelToLinear', parameters.envMapEncoding)}
       ${getTexelEncodingFunction('linearToOutputTexel', parameters.outputEncoding)}
     `)

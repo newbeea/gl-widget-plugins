@@ -67,7 +67,7 @@ class BlinnPhongMaterial {
         color.xyz = emissive + ambient + diffuse + specular;
         
         color.w = 1.0;
-        gl_FragColor = vec4(N, 1.);
+        gl_FragColor = color;
       }
     `
     this.uniforms =  {

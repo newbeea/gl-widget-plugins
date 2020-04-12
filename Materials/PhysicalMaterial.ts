@@ -8,6 +8,7 @@ import { Lights } from "./Lights";
 import { open } from "fs";
 import { Light } from "./Light";
 class PhysicalMaterial {
+  lightVersion: any;
   lights: Lights;
   vertexShader: string
   fragmentShader: string
@@ -32,8 +33,14 @@ class PhysicalMaterial {
           needsRecompile = true
         }
         this.uniforms[option].value = options[option]
-        console.log( options[option])
-        
+      }
+    }
+    if (options.lights) {
+      Object.assign(this.uniforms, options.lights.uniforms)
+      let lightVersion = this.getLightVersion(options.lights.uniforms)
+      if (this.lightVersion != lightVersion) {
+        needsRecompile = true
+        this.lightVersion = lightVersion
       }
     }
 
@@ -42,6 +49,14 @@ class PhysicalMaterial {
     }
     this.updateUvTransform()
     
+  }
+  getLightVersion(lights) {
+    let version = ''
+    for(let lightType in lights) {
+      let light = lights[lightType]
+      version += lightType + <string>light.value.length
+    }
+    return version
   }
   compile () {
     this.getParameters()
@@ -175,7 +190,6 @@ class PhysicalMaterial {
   }
   update (options: PhysicalMaterialOptions = {}, force: boolean = false) {
     Object.assign(this.options, options)
-    console.log(this.options, options)
     this.updateUniforms(options, force)
 
   }

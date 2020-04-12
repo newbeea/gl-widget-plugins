@@ -2,9 +2,17 @@ import { Vector3, Camera } from "@gl-widget/gl-widget";
 import { Light } from "./Light";
 import { PointLight } from "./PointLight";
 import { DirectionalLight } from "./DirectionalLight";
+export interface LightUniforms {
+  pointLights: {
+    value: Array<Light>
+  },
+  directionalLights: {
+    value: Array<Light>
+  }
+}
 class Lights {
   cache: WeakMap<Light, Light> = new WeakMap()
-  uniforms: any = {
+  uniforms: LightUniforms = {
     pointLights: {
       value:[]
     },
@@ -13,7 +21,7 @@ class Lights {
     }
   }
   constructor(
-    private lights: any[] = []
+    private lights: Array<Light> = []
   ) {
     this.lights.forEach((light: Light) => {
       let l = light.clone()

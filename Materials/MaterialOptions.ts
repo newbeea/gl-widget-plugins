@@ -1,5 +1,6 @@
 import { RenderSide, Encoding, Texture, Vector3, Vector2 } from "@gl-widget/gl-widget";
 import { ToneMapping } from "./Constants";
+import { Lights } from "./Lights";
 
 
 
@@ -36,5 +37,6 @@ export interface PhysicalMaterialOptions {
   offset?: Vector2,
   repeat?: Vector2,
   center?: Vector2,
-  rotation?: number
+  rotation?: number,
+  lights?: Lights
 }

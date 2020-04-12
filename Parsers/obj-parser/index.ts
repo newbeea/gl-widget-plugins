@@ -2,7 +2,6 @@ import { BufferGeometry, Float32Attribute, Uint32Attribute } from '@gl-widget/gl
 import parseOBJ from 'parse-wavefront-obj'
 function parse(objString) {
   let obj = parseOBJ(objString);
-  console.log(1, obj)
   let geometry = new BufferGeometry()
   let normal = []
 

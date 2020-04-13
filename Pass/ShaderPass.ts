@@ -1,10 +1,9 @@
-import { Pass } from "../../../Pass";
-import { RenderableElement } from "../../../RenderableElement";
-import { PlaneGeometry } from "../Geometries/PlaneGeometry";
-import { Renderer } from "../../../Renderer";
-import { OrthographicCamera } from "../../../cameras/OrthographicCamera";
-import { Texture } from "../../../Texture";
-import { RenderTarget } from "../../../RenderTarget";
+import { Pass, BufferGeometry, Uint32Attribute, Float32Attribute } from "@gl-widget/gl-widget";
+import { RenderableElement } from "@gl-widget/gl-widget";
+import { GLWidget } from "@gl-widget/gl-widget";
+import { OrthographicCamera } from "@gl-widget/gl-widget";
+import { Texture } from "@gl-widget/gl-widget";
+import { RenderTarget } from "@gl-widget/gl-widget";
 
 class ShaderPass extends Pass {
   camera: OrthographicCamera;
@@ -13,47 +12,56 @@ class ShaderPass extends Pass {
   fullScreenQuad: RenderableElement;
   texture: Texture;
   h: WeakMap<any, any>;
-  constructor (material, textureID = 'tDiffuse') {
+  constructor (shader, textureID = 'diffuseMap') {
     super()
 
     this.textureID = textureID
 
-    this.uniforms = material.uniforms;
+    this.uniforms = shader.uniforms;
     this.camera = new OrthographicCamera( - 1, 1, 1, - 1, -1, 1 )
+    let geometry = new BufferGeometry()
+      geometry.addAttribute('position', new Float32Attribute([
+        1, -1, 0,
+        1, 1, 0,
+        -1, 1, 0,
+        -1, -1, 0
+       
+      ], 3))
+      geometry.addAttribute('uv', new Float32Attribute([
+        1, 0,
+        1, 1,
+        0, 1,
+        0, 0
+       
+      ], 2))
+      geometry.addAttribute('index', new Uint32Attribute([
+        0, 1, 2, 2, 3, 0
+      ], 1))
     this.fullScreenQuad = new RenderableElement(
-      material, 
-      new PlaneGeometry(2, 2)
+      shader, 
+      geometry
     )
-    
-    this.texture = new Texture(require('../../../../examples/image/MatCap.jpg').default)
-    this.h = new WeakMap()
-    // this.needsSwap = false;
+    this.uniforms[ this.textureID ].value = this.texture
   }
-  render ( renderer: Renderer, writeBuffer: RenderTarget, readBuffer: RenderTarget /*, deltaTime, maskActive */ ) {
+  render ( glWidget: GLWidget, writeBuffer: RenderTarget, readBuffer: RenderTarget /*, deltaTime, maskActive */ ) {
 
 		if ( this.uniforms[ this.textureID ] ) {
-      this.uniforms[ this.textureID ].value = readBuffer.texture;
-      this.h.set(readBuffer.texture, true)
-      // console.log(this.h)
-      // this.fullScreenQuad.uniforms.tDiffuse.value = this.texture
+      this.uniforms[ this.textureID ].value = readBuffer.texture
     }
     
-    // console.log(this.renderToScreen, this.fullScreenQuad)
+    
 		if ( this.renderToScreen ) {
-
-			renderer.setRenderTarget( null );
-			renderer.render(undefined, this.fullScreenQuad, this.camera, true)
+      
+      glWidget.setRenderTarget( null );
+      glWidget.clear()
+			glWidget.renderElement(this.fullScreenQuad, this.camera)
 
 		} else {
 
-			renderer.setRenderTarget( writeBuffer );
+			glWidget.setRenderTarget( writeBuffer );
 			// TODO: Avoid using autoClear properties, see https://github.com/mrdoob/three.js/pull/15571#issuecomment-465669600
 			// if ( this.clear ) renderer.clear( renderer.autoClearColor, renderer.autoClearDepth, renderer.autoClearStencil );
-			renderer.render(undefined, this.fullScreenQuad, this.camera, true)
-
-		
-
-
+			glWidget.renderElement(this.fullScreenQuad, this.camera)
 		}
 
 	}

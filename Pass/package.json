@@ -1,0 +1,30 @@
+{
+  "name": "@gl-widget/pass",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.cjs.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "dev": "rollup -c -w --environment NODE_ENV:development",
+    "build": "rollup -c --environment NODE_ENV:production",
+    "push": "npm run build && npm version patch && npm publish --access=public",
+    "dev-link": "npm link @gl-widget/gl-widget && npm link"
+  },
+  "dependencies": {
+    "@gl-widget/gl-widget": "^1.0.0"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/core": "^7.9.0",
+    "@babel/preset-env": "^7.9.0",
+    "@rollup/plugin-commonjs": "^11.0.2",
+    "@rollup/plugin-node-resolve": "^7.1.1",
+    "rollup": "^2.3.2",
+    "rollup-plugin-babel": "^4.4.0",
+    "rollup-plugin-terser": "^5.3.0",
+    "rollup-plugin-typescript2": "^0.27.0",
+    "typescript": "^3.8.3"
+  }
+}

@@ -23,7 +23,7 @@ function parse(objString) {
     }
 
     index.push(i * 3, i * 3 + 1, i * 3 + 2)
-    // console.log(normalIndies)
+
     // normal = normal.concat(obj.vertexNormals[normalIndies[0]])
     // normal = normal.concat(obj.vertexNormals[normalIndies[1]])
     // normal = normal.concat(obj.vertexNormals[normalIndies[2]])

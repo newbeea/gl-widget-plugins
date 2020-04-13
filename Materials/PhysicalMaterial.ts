@@ -134,10 +134,10 @@ class PhysicalMaterial {
         value: 0
       },
       roughness: {
-        value: 0
+        value: 0.5
       },
       metalness: {
-        value: 1
+        value: 0
       },
       flipEnvMap: {
         value: -1,

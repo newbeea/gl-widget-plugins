@@ -1,20 +1,15 @@
-import { Pass } from "../../../Pass";
-import { Object3D, Background, Renderer } from "../../../Renderer";
-import { Camera } from "../../../cameras/Camera";
+import { Pass, GLWidget } from "@gl-widget/gl-widget";
+import { Object3D, Background, Renderer } from "@gl-widget/gl-widget";
+import { Camera } from "@gl-widget/gl-widget";
 
 class RenderPass extends Pass {
-  background: Background;
-  camera: Camera;
-  scene: Object3D;
-  constructor(background: Background, scene: Object3D, camera: Camera) {
-    super()
-    this.background = background
-    this.scene = scene;
-	this.camera = camera;
-	this.needsSwap = false;
 
+	needsSwap: boolean;
+  constructor() {
+    super()
+		this.needsSwap = false;
   }
-  render ( renderer: Renderer, writeBuffer, readBuffer /*, deltaTime, maskActive */ ) {
+  render ( glWidget: GLWidget, writeBuffer, readBuffer /*, deltaTime, maskActive */ ) {
 
 		// var oldAutoClear = renderer.autoClear;
 		// renderer.autoClear = false;
@@ -38,11 +33,11 @@ class RenderPass extends Pass {
 
 		// }
    		// console.log(this.renderToScreen)
-		renderer.setRenderTarget( this.renderToScreen ? null : readBuffer );
+		glWidget.setRenderTarget( this.renderToScreen ? null : readBuffer );
 
 		// TODO: Avoid using autoClear properties, see https://github.com/mrdoob/three.js/pull/15571#issuecomment-465669600
 		// if ( this.clear ) renderer.clear( renderer.autoClearColor, renderer.autoClearDepth, renderer.autoClearStencil );
-		renderer.render(this.background, this.scene, this.camera, true );
+		glWidget.renderFrame();
     
 		// if ( this.clearColor ) {
 

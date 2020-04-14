@@ -1,6 +1,6 @@
 {
-  "name": "@gl-widget/materials",
-  "version": "1.0.2",
+  "name": "@gl-widget/physical-shader",
+  "version": "1.0.0",
   "description": "",
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",

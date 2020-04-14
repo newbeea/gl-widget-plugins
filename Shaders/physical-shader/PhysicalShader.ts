@@ -7,7 +7,7 @@ import { ToneMapping } from "./Constants";
 import { Lights } from "./Lights";
 import { open } from "fs";
 import { Light } from "./Light";
-class PhysicalMaterial {
+class PhysicalShader {
   lightVersion: any;
   lights: Lights;
   vertexShader: string
@@ -75,7 +75,7 @@ class PhysicalMaterial {
 
     this.uniforms = {
       diffuse: {
-        value: new Vector3(0, 0, 0)
+        value: new Vector3(1, 1, 1)
       },
       ambientLightColor: {
         value: new Vector3(0, 0, 0)
@@ -385,5 +385,5 @@ class PhysicalMaterial {
   
 }
 export {
-  PhysicalMaterial
+  PhysicalShader
 }

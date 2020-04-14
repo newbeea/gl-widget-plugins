@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "link": "cd SvgElement && npm link @gl-widget/gl-widget && cd ../Parsers/obj-parser && npm link @gl-widget/gl-widget && cd ../../Materials && npm link @gl-widget/gl-widget && cd ../Geometries && npm link @gl-widget/gl-widget && cd ../Controls/orbit-controls && npm link @gl-widget/gl-widget",
+    "link": "cd SvgElement && npm link @gl-widget/gl-widget && cd ../Parsers/obj-parser && npm link @gl-widget/gl-widget && cd ../../Shaders/physical-shader && npm link @gl-widget/gl-widget && cd ../../Geometries && npm link @gl-widget/gl-widget && cd ../Controls/orbit-controls && npm link @gl-widget/gl-widget",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

@@ -56,7 +56,7 @@ void main() {
 #endif
 
 #ifdef USE_MAP
-	vec4 texelColor = texture2D( map, vUv );
+	vec4 texelColor = texture2D( diffuseMap, vUv );
 	texelColor = mapTexelToLinear( texelColor );
 	diffuseColor *= texelColor;
 #endif

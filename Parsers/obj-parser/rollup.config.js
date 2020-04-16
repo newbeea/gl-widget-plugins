@@ -36,7 +36,7 @@ export default {
       sourcemap: true
     }, {
       file: 'dist/index.umd.js',
-      name: 'parse',
+      name: 'ObjParser',
       format: 'umd',
       sourcemap: true,
       globals: {

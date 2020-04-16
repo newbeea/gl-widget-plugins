@@ -1,12 +1,10 @@
 import { RenderSide, Vector3, Matrix3, Vector2, Encoding } from "@gl-widget/gl-widget";
-import { PhysicalMaterialOptions } from "./MaterialOptions";
+import { PhysicalShaderOptions } from "./ShaderOptions";
 import physicalVertex from './shader-lib/physical-vertex.glsl'
 import physicalFragment from './shader-lib/physical-fragment.glsl'
 import { replaceLightNums, unrollLoops, replaceTonemapping, replaceColorspace, replaceClippingPlanes, getToneMappingFunction, getTexelDecodingFunction, getTexelEncodingFunction } from "./utils";
 import { ToneMapping } from "./Constants";
 import { Lights } from "./Lights";
-import { open } from "fs";
-import { Light } from "./Light";
 class PhysicalShader {
   lightVersion: any;
   lights: Lights;
@@ -17,7 +15,7 @@ class PhysicalShader {
   transparent: boolean = false 
   defines: Array<string> = [];
   parameters: any
-  options: PhysicalMaterialOptions
+  options: PhysicalShaderOptions
 
   rotation: number;
   center: Vector2;
@@ -63,7 +61,7 @@ class PhysicalShader {
       this.vertexShader = this.getVertexShader()
       this.fragmentShader = this.getFragmentShader()
   }
-  constructor (options: PhysicalMaterialOptions = {}) {
+  constructor (options: PhysicalShaderOptions = {}) {
     this.options = Object.assign({
       offset: new Vector2( 0, 0 ),
       repeat: new Vector2( 1, 1 ),
@@ -80,7 +78,7 @@ class PhysicalShader {
       ambientLightColor: {
         value: new Vector3(0, 0, 0)
       },
-      map: {
+      diffuseMap: {
         value: null,
         needsRecompile: true
       },
@@ -188,7 +186,7 @@ class PhysicalShader {
       this.options.center.x, 
       this.options.center.y )
   }
-  update (options: PhysicalMaterialOptions = {}, force: boolean = false) {
+  update (options: PhysicalShaderOptions = {}, force: boolean = false) {
     Object.assign(this.options, options)
     this.updateUniforms(options, force)
 
@@ -205,8 +203,8 @@ class PhysicalShader {
 
 			instancing: options.isInstanced === true,
 
-			map: !! this.uniforms.map.value,
-			mapEncoding: this.getTextureEncodingFromMap(  this.uniforms.map.value ),
+			diffuseMap: !! this.uniforms.diffuseMap.value,
+			mapEncoding: this.getTextureEncodingFromMap(  this.uniforms.diffuseMap.value ),
 
 			envMap: !! this.uniforms.envMap.value,
 			// envMapMode: envMap && envMap.mapping,
@@ -271,7 +269,7 @@ class PhysicalShader {
 
 			index0AttributeName: undefined,
     };
-    this.parameters.vertexUvs = this.parameters.map 
+    this.parameters.vertexUvs = this.parameters.diffuseMap 
     || this.parameters.normalMap
     || this.parameters.emissiveMap
     || this.parameters.aoMap
@@ -297,7 +295,7 @@ class PhysicalShader {
       parameters.toneMapping ? '#define TONE_MAPPING' : '',
       parameters.doubleSided ? '#define DOUBLE_SIDED' : '',
       parameters.vertexUvs ? '#define USE_UV' : '',
-      parameters.map ? '#define USE_MAP' : '',
+      parameters.diffuseMap ? '#define USE_MAP' : '',
 			parameters.envMap ? '#define USE_ENVMAP' : '',
 			parameters.envMap ? '#define ' + envMapTypeDefine : '',
 			parameters.envMap ? '#define ' + envMapModeDefine : '',
@@ -353,7 +351,7 @@ class PhysicalShader {
   
       parameters.doubleSided ? '#define DOUBLE_SIDED' : '',
       parameters.vertexUvs ? '#define USE_UV' : '',
-      parameters.map ? '#define USE_MAP' : '',
+      parameters.diffuseMap ? '#define USE_MAP' : '',
       parameters.envMap ? '#define USE_ENVMAP' : '',
       parameters.envMap ? '#define ' + envMapModeDefine : '',
 

@@ -1,6 +1,6 @@
 {
   "name": "@gl-widget/physical-shader",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "",
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
@@ -11,7 +11,9 @@
     "push": "npm run build && npm version patch && npm publish --access=public",
     "dev-link": "npm link @gl-widget/gl-widget && npm link"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@gl-widget/gl-widget": "^1.0.4"
+  },
   "author": "",
   "license": "ISC",
   "devDependencies": {

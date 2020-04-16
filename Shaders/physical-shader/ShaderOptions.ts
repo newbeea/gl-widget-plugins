@@ -5,7 +5,7 @@ import { Lights } from "./Lights";
 
 
 
-export interface PhysicalMaterialOptions {
+export interface PhysicalShaderOptions {
   color?: string,
   isInstanced?: boolean,
   fog?: boolean,
@@ -27,7 +27,7 @@ export interface PhysicalMaterialOptions {
   emissive?: Vector3,
   diffuse?: Vector3,
   ambientLightColor?: Vector3,
-  map?: Texture,
+  diffuseMap?: Texture,
   envMap?: Texture,
   normalMap?: Texture,
   aoMap?: Texture,

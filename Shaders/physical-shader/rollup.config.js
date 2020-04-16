@@ -46,7 +46,7 @@ export default {
       sourcemap: true
     }, {
       file: 'dist/index.umd.js',
-      name: 'materials',
+      name: 'PhysicalShader',
       format: 'umd',
       sourcemap: true,
       globals: {

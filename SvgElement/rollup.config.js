@@ -7,7 +7,7 @@ import typescript from 'rollup-plugin-typescript2';
 import {terser} from 'rollup-plugin-terser';
 import babel from 'rollup-plugin-babel';
 import builtins from 'rollup-plugin-node-builtins';
-
+import globals from 'rollup-plugin-node-globals';
 let isProd = process.env.NODE_ENV === 'production'
 
 const basePlugins = [
@@ -18,8 +18,10 @@ const basePlugins = [
     main: true,
     preferBuiltins: true
   }),
+  
   builtins(),
   commonjs({ extensions: ['.js', '.ts'] }),
+  globals(),
 ]
 const devPlugins = []
 const prodPlugins = [terser()]
@@ -40,7 +42,7 @@ export default {
       sourcemap: true
     }, {
       file: 'dist/index.umd.js',
-      name: 'materials',
+      name: 'SvgElement',
       format: 'umd',
       sourcemap: true,
       globals: {

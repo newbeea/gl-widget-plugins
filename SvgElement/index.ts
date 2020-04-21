@@ -20,10 +20,19 @@ class SvgElement extends RenderableElement {
       `
     }, material)
     super(material, new SvgGeometry(node, options));
+    if (options.scale) {
+      if (options.scale.x) {
+        this.scale.set(options.scale.x, options.scale.y, 1)
+      } else {
+        this.scale.set(options.scale, options.scale, 1)
+      }
+      
+    }
+    console.log(options)
+    
   }
 }
 
-export {
-  SvgElement
-}
+export default SvgElement
+
 

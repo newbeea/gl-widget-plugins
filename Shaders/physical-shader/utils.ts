@@ -26,7 +26,7 @@ function replaceClippingPlanes (string, clippingPlanes, clipIntersections) {
   
 }
 function unrollLoops(string) {
-  var loopPattern = /#pragma unroll_loop[\s]+?for \( int i \= (\d+)\; i < (\d+)\; i \+\+ \) \{([\s\S]+?)(?=\})\}/g;
+  var loopPattern = /#pragma unroll_loop[\s\n]+?for \( int i \= (\d+)\; i < (\d+)\; i \+\+ \) \{([\s\S]+?)(?=\})\}/g;
   return string.replace(loopPattern, loopReplacer);
 }
 
